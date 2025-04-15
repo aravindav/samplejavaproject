@@ -1,0 +1,10 @@
+# Maven build directory
+target/*
+
+# Eclipse project files
+.classpath
+.settings
+.project
+
+# Maven wrapper directory
+.mvn/ 
