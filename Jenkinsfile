@@ -11,7 +11,14 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/aravindav/samplejavaproject.git'
             }
         }
-
+         stage('Debug PATH & Terraform') {
+              steps {
+                // print PATH
+                sh 'echo $PATH'
+                // show if terraform binary is found
+                sh 'which terraform'
+          }
+        }
         stage('Setup AWS Credentials') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
