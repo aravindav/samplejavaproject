@@ -1,9 +1,13 @@
 pipeline {
     agent any
 
+  
     environment {
-        AWS_REGION = 'us-east-1'
-    }
+    AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+    AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+    AWS_REGION            = 'us-east-1'
+      }
+
 
     stages {
         stage('Checkout') {
@@ -20,33 +24,7 @@ pipeline {
           }
         }
 
-        stage('Jenkins user checking if aws-cli is installed') {
-            steps {
-                sh 'aws --version'
-            }
-        }
-        stage('AWS Identity Check') {
-      steps {
-        // <-- here’s where you bind your AWS creds
-        withCredentials([[
-          $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws-jenkins-demo'
-        ]]) {
-          // Inside this block, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-          // are automatically set for any AWS CLI or Terraform calls
-          sh '''
-            echo "Caller identity:"
-            aws sts get-caller-identity
-          '''
-        }
-      }
-    }
-        stage('STAGE AFTER AWS') {
-              steps {
-                // print PATH
-                sh 'echo STAGE AFTER AWS'
-          }
-        }
+
 
         stage('Terraform Init') {
             steps {
