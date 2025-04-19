@@ -23,16 +23,22 @@ pipeline {
                 sh 'which terraform'
           }
         }
-        stage('Setup AWS Credentials') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'aws-jenkins-demo']]) {
-                    sh '''
-                        aws sts get-caller-identity
-                    '''
-                }
-            }
+        stage('AWS Identity Check') {
+      steps {
+        // <-- here’s where you bind your AWS creds
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-jenkins-demo'
+        ]]) {
+          // Inside this block, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+          // are automatically set for any AWS CLI or Terraform calls
+          sh '''
+            echo "Caller identity:"
+            aws sts get-caller-identity
+          '''
         }
+      }
+    }
         stage('STAGE AFTER AWS') {
               steps {
                 // print PATH
