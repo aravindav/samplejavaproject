@@ -29,6 +29,12 @@ pipeline {
                 }
             }
         }
+        stage('STAGE AFTER AWS') {
+              steps {
+                // print PATH
+                sh 'echo STAGE AFTER AWS'
+          }
+        }
 
         stage('Terraform Init') {
             steps {
