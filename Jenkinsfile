@@ -1,44 +1,52 @@
 pipeline {
     agent any
-    
+
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')  // AWS credentials from Jenkins
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') 
+        AWS_REGION = 'us-east-1'
     }
-    
+
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                // Checkout the GitHub repository (including both Java and Terraform files)
-                git 'https://github.com/aravindav/samplejavaproject.git'
+                git branch: 'main', url: 'https://github.com/aravindav/samplejavaproject.git'
             }
         }
 
-        stage('Install Terraform') {
+        stage('Setup AWS Credentials') {
             steps {
-                // Check if Terraform is installed on Jenkins
-                sh 'terraform --version'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-jenkins-demo']]) {
+                    sh '''
+                        aws sts get-caller-identity
+                    '''
+                }
             }
         }
 
-        stage('Initialize Terraform') {
+        stage('Terraform Init') {
             steps {
-                // Initialize Terraform (downloads necessary plugins, sets up the environment)
-                sh 'terraform init'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-jenkins-creds']]) {
+                    sh 'terraform init'
+                }
             }
         }
 
-        stage('Plan Terraform Deployment') {
+        stage('Terraform Plan') {
             steps {
-                // Run terraform plan to see what will happen
-                sh 'terraform plan'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-jenkins-creds']]) {
+                    sh 'terraform plan'
+                }
             }
         }
 
-        stage('Apply Terraform Changes') {
+        stage('Terraform Apply') {
             steps {
-                // Apply the Terraform plan (create resources)
-                sh 'terraform apply -auto-approve'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-jenkins-creds']]) {
+                    sh 'terraform apply -auto-approve'
+                }
             }
         }
     }
