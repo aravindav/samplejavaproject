@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 // Checkout the GitHub repository (including both Java and Terraform files)
-                git 'https://github.com/your-username/your-repo.git'
+                git 'https://github.com/aravindav/samplejavaproject.git'
             }
         }
 
