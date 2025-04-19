@@ -19,6 +19,14 @@ pipeline {
                 sh 'which terraform'
           }
         }
+
+         stages {
+        stage('Jenkins user checking if aws-cli is installed') {
+            steps {
+                sh 'aws --version'
+            }
+        }
+        }
         stage('AWS Identity Check') {
       steps {
         // <-- here’s where you bind your AWS creds
