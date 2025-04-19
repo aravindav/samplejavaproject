@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+     tools {
+    // (optional) if you’ve configured Terraform as a tool in Jenkins
+         terraform 'terraform-1.11.4'
+      }
     environment {
         AWS_REGION = 'us-east-1'
     }
