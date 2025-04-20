@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     parameters {
-        booleanParam(name: 'autoApprove', defaultValue: true, description: 'Automatically run apply after generating plan?')
+        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+        choice(name: 'action', choices: ['apply', 'destroy'], description: 'Select the action to perform')
     }
 
     environment {
@@ -17,24 +18,32 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/aravindav/samplejavaproject.git'
             }
         }
-        stage('Terraform init') {
+
+        stage('Terraform Init') {
             steps {
                 sh 'terraform init'
             }
         }
+
         stage('Plan') {
             steps {
-                sh 'terraform plan -out tfplan'
+                sh 'terraform plan -out=tfplan'
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
-        stage('Apply') {
+
+        stage('Apply / Destroy') {
             steps {
                 script {
-                    if (params.autoApprove) {
+                    if (params.action == 'apply') {
+                        if (!params.autoApprove) {
+                            def plan = readFile 'tfplan.txt'
+                            input message: "Do you want to apply the plan?",
+                            parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                        }
                         sh 'terraform apply -input=false tfplan'
-                    } else {
-                        error "Auto approve is disabled. Please approve manually."
+                    } else if (params.action == 'destroy') {
+                        sh 'terraform destroy -auto-approve'
                     }
                 }
             }
